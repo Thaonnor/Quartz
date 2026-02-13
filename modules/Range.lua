@@ -29,7 +29,7 @@ local CreateFrame, UIParent = CreateFrame, UIParent
 local UnitCastingInfo, UnitChannelInfo, UnitName = UnitCastingInfo, UnitChannelInfo, UnitName
 local unpack = unpack
 
-local IsSpellInRange = IsSpellInRange or C_Spell.IsSpellInRange
+local IsSpellInRange = C_Spell.IsSpellInRange
 
 local f, OnUpdate, db, getOptions, spell, target, modified, r, g, b, castBar
 

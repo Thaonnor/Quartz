@@ -219,129 +219,7 @@ local function setBarTicks(ticknum, duration, ticks)
 	end
 end
 
-local channelingTicks = WoWWrath and {
-	--- Wrath
-	-- druid
-	[GetSpellName(740)] = 4, -- tranquility
-	[GetSpellName(16914)] = 10, -- hurricane
-	-- hunter
-	[GetSpellName(1510)] = 6, -- volley
-	-- mage
-	[GetSpellName(10)] = 8, -- blizzard
-	[5143] = 3, -- arcane missiles r1
-	[5144] = 4, -- arcane missiles r2
-	[GetSpellName(5145)] = 5, -- arcane missiles
-	-- priest
-	[GetSpellName(15407)] = 3, -- mind flay
-	[GetSpellName(48045)] = 5, -- mind sear
-	[GetSpellName(47540)] = 2, -- penance
-	[GetSpellName(64843)] = 4, -- divine hymn
-	[GetSpellName(64901)] = 4, -- hymn of hope
-	-- warlock
-	[GetSpellName(1949)] = 15, -- hellfire
-	[GetSpellName(5740)] = 4, -- rain of fire
-	[GetSpellName(5138)] = 5, -- drain mana
-	[GetSpellName(689)] = 5, -- drain life
-	[GetSpellName(1120)] = 5, -- drain soul
-	[GetSpellName(755)] = 10, -- health funnel
-} or WoWMists and {
-	--- Mists
-	-- deathknight
-	[GetSpellName(42650)] = 8, -- army of the dead
-	-- druid
-	[GetSpellName(740)] = 4, -- tranquility
-	[GetSpellName(16914)] = 10, -- hurricane
-	[GetSpellName(127663)] = 10, -- astral communion
-	[GetSpellName(106996)] = 10, -- astral storm
-	--hunter
-	[GetSpellName(120360)] = 15, -- barrage
-	-- mage
-	[GetSpellName(10)] = 8, -- blizzard
-	[GetSpellName(5143)] = 5, -- arcane missiles
-	[GetSpellName(12051)] = 3, -- evocation
-	-- monk
-	[GetSpellName(101546)] = 3, -- spinning crane kick
-	[GetSpellName(113656)] = 4, -- fists of fury
-	[GetSpellName(115175)] = 8, -- soothing mist
-	[GetSpellName(115294)] = 6, -- mana tea
-	[GetSpellName(117952)] = 6, -- crackling jade lightning
-	-- priest
-	[GetSpellName(15407)] = 3, -- mind flay
-	[GetSpellName(129197)] = 3, -- mind flay insanity
-	[GetSpellName(48045)] = 5, -- mind sear
-	[GetSpellName(47540)] = 2, -- penance
-	[GetSpellName(64843)] = 4, -- divine hymn
-	[GetSpellName(64901)] = 4, -- hymn of hope
-	-- warlock
-	[GetSpellName(1949)] = 14, -- hellfire
-	[GetSpellName(5740)] = 6, -- rain of fire
-	[GetSpellName(689)] = 6, -- drain life
-	[GetSpellName(1120)] = 6, -- drain soul
-	[GetSpellName(755)] = 6, -- health funnel
-	[GetSpellName(103103)] = 4, -- malefic grasp
-} or WoWCata and {
-	--- Wrath
-	-- druid
-	[GetSpellName(740)] = 4, -- tranquility
-	[GetSpellName(16914)] = 10, -- hurricane
-	-- mage
-	[GetSpellName(10)] = 8, -- blizzard
-	[GetSpellName(5143)] = 5, -- arcane missiles
-	-- priest
-	[GetSpellName(15407)] = 3, -- mind flay
-	[GetSpellName(48045)] = 5, -- mind sear
-	[GetSpellName(47540)] = 2, -- penance
-	[GetSpellName(64843)] = 4, -- divine hymn
-	[GetSpellName(64901)] = 4, -- hymn of hope
-	-- warlock
-	[GetSpellName(1949)] = 15, -- hellfire
-	[GetSpellName(5740)] = 4, -- rain of fire
-	[GetSpellName(689)] = 5, -- drain life
-	[GetSpellName(1120)] = 5, -- drain soul
-	[GetSpellName(755)] = 10, -- health funnel
-} or WoWBC and {
-	--- BCC
-	-- druid
-	[GetSpellName(740)] = 4, -- tranquility
-	[GetSpellName(16914)] = 10, -- hurricane
-	-- hunter
-	[GetSpellName(1510)] = 6, -- volley
-	-- mage
-	[GetSpellName(10)] = 8, -- blizzard
-	[5143] = 3, -- arcane missiles r1
-	[5144] = 4, -- arcane missiles r2
-	[GetSpellName(5145)] = 5, -- arcane missiles
-	-- priest
-	[GetSpellName(15407)] = 3, -- mind flay
-	[GetSpellName(10797)] = 5, -- star shards
-	-- warlock
-	[GetSpellName(1949)] = 15, -- hellfire
-	[GetSpellName(5740)] = 4, -- rain of fire
-	[GetSpellName(5138)] = 5, -- drain mana
-	[GetSpellName(689)] = 5, -- drain life
-	[GetSpellName(1120)] = 5, -- drain soul
-	[GetSpellName(755)] = 10, -- health funnel
-} or WoWClassicEra and {
-	-- druid
-	[GetSpellName(740)] = 5, -- tranquility
-	[GetSpellName(16914)] = 10, -- hurricane
-	-- hunter
-	[GetSpellName(136)] = 5, -- mend pet
-	[GetSpellName(1510)] = 6, -- volley
-	-- mage
-	[GetSpellName(10)] = 8, -- blizzard
-	[GetSpellName(5143)] = 3, -- arcane missiles
-	-- priest
-	[GetSpellName(15407)] = 3, -- mind flay
-	[GetSpellName(10797)] = 6, -- star shards
-	-- warlock
-	[GetSpellName(1949)] = 15, -- hellfire
-	[GetSpellName(5740)] = 4, -- rain of fire
-	[GetSpellName(5138)] = 5, -- drain mana
-	[GetSpellName(689)] = 5, -- drain life
-	[GetSpellName(1120)] = 5, -- drain soul
-	[GetSpellName(755)] = 10, -- health funnel
-} or WoWRetail and {
+local channelingTicks = {
 	--- Retail
 	-- warlock
 	[GetSpellName(234153)] = 5, -- drain life
@@ -376,7 +254,7 @@ local channelingTicks = WoWWrath and {
 	-- demon hunter
 	[GetSpellName(212084)] = 10, -- fel devastation
 	[GetSpellName(452486)] = 10, -- fel desolation
-} or {}
+}
 
 
 local function getChannelingTicks(spell, spellid)
@@ -392,20 +270,18 @@ end
 
 function Player:UpdateChannelingTicks()
 	local playerClass = select(2, UnitClass("player"))
-	if WoWRetail then
-		if playerClass == "PRIEST" then
-			-- Castigation talent adds a tick to penance
-			channelingTicks[GetSpellName(47540)] = IsPlayerSpell(193134) and 4 or 3
-		elseif playerClass == "MAGE" then
-			-- Amplification talent adds 3 ticks to Arcane Missiles
-			channelingTicks[GetSpellName(5143)] = IsPlayerSpell(236628) and 8 or 5
-		elseif playerClass == "DRUID" then
-			-- Several talents remove 4 ticks from Convoke
-			channelingTicks[GetSpellName(391528)] = (IsPlayerSpell(391548) or IsPlayerSpell(393991) or IsPlayerSpell(393414) or IsPlayerSpell(393371)) and 12 or 16
-		elseif playerClass == "EVOKER" then
-			-- Azure Celerity adds a tick to Disintegrate
-			channelingTicks[GetSpellName(356995)] = IsPlayerSpell(1219723) and 4 or 3
-		end
+	if playerClass == "PRIEST" then
+		-- Castigation talent adds a tick to penance
+		channelingTicks[GetSpellName(47540)] = IsPlayerSpell(193134) and 4 or 3
+	elseif playerClass == "MAGE" then
+		-- Amplification talent adds 3 ticks to Arcane Missiles
+		channelingTicks[GetSpellName(5143)] = IsPlayerSpell(236628) and 8 or 5
+	elseif playerClass == "DRUID" then
+		-- Several talents remove 4 ticks from Convoke
+		channelingTicks[GetSpellName(391528)] = (IsPlayerSpell(391548) or IsPlayerSpell(393991) or IsPlayerSpell(393414) or IsPlayerSpell(393371)) and 12 or 16
+	elseif playerClass == "EVOKER" then
+		-- Azure Celerity adds a tick to Disintegrate
+		channelingTicks[GetSpellName(356995)] = IsPlayerSpell(1219723) and 4 or 3
 	end
 end
 
