@@ -246,9 +246,9 @@ function Mirror:OnEnable()
 	end)
 
 	media.RegisterCallback(self, "LibSharedMedia_Registered", function(mtype, key)
-		if mtype == "statusbar" and key == self.config.mirrortexture then
+		if mtype == "statusbar" and key == db.mirrortexture then
 			for i, v in pairs(mirrorbars) do
-				v:SetStatusBarTexture(media:Fetch("statusbar", self.config.mirrortexture))
+				v:SetStatusBarTexture(media:Fetch("statusbar", db.mirrortexture))
 			end
 		end
 	end)
