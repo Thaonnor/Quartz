@@ -267,11 +267,13 @@ function Mirror:OnDisable()
 		v:SetScript("OnUpdate", nil)
 	end
 
-	MirrorTimerContainer:Show()
-	MirrorTimerContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
-	MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_START")
-	MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_STOP")
-	MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_PAUSE")
+	if MirrorTimerContainer then
+		MirrorTimerContainer:Show()
+		MirrorTimerContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
+		MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_START")
+		MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_STOP")
+		MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_PAUSE")
+	end
 
 	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
 	media.UnregisterCallback(self, "LibSharedMedia_Registered")
@@ -353,7 +355,7 @@ do
 		if db.showmirror then
 			for i = 1, MIRRORTIMER_NUMTIMERS do
 				local timer, value, maxvalue, scale, paused, label = GetMirrorTimerInfo(i)
-				if timer ~= "UNKNOWN" then
+				if timer and timer ~= "UNKNOWN" then
 					local t = new()
 					tmp[#tmp+1] = t
 					t.name = label
@@ -702,13 +704,17 @@ do
 				direction = apply(i, v, direction)
 			end
 			if db.hideblizzmirrors then
-				MirrorTimerContainer:UnregisterAllEvents()
+				if MirrorTimerContainer then
+					MirrorTimerContainer:UnregisterAllEvents()
+				end
 			else
-				MirrorTimerContainer:Show()
-				MirrorTimerContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
-				MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_START")
-				MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_STOP")
-				MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_PAUSE")
+				if MirrorTimerContainer then
+					MirrorTimerContainer:Show()
+					MirrorTimerContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
+					MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_START")
+					MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_STOP")
+					MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_PAUSE")
+				end
 			end
 			db.RESURRECT_NO_TIMER = db.RESURRECT_NO_SICKNESS
 			self:UpdateBars()

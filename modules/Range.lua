@@ -75,13 +75,14 @@ function Range:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+	self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START")
 end
 
 function Range:ApplySettings()
 	db = self.db.profile
 end
 
-function Range:UNIT_SPELLCAST_START(event, unit)
+function Range:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	if unit ~= "player" then
 		return
 	end
@@ -89,13 +90,13 @@ function Range:UNIT_SPELLCAST_START(event, unit)
 		castBar = Player.Bar.Bar
 	end
 	if target then
-		spell = UnitCastingInfo(unit)
+		spell = spellID or UnitCastingInfo(unit)
 		modified, r, g, b = nil, nil, nil, nil
 		f:SetScript("OnUpdate", OnUpdate)
 	end
 end
 
-function Range:UNIT_SPELLCAST_CHANNEL_START(event, unit)
+function Range:UNIT_SPELLCAST_CHANNEL_START(event, unit, guid, spellID)
 	if unit ~= "player" then
 		return
 	end
@@ -103,11 +104,13 @@ function Range:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 		castBar = Player.Bar.Bar
 	end
 	if target then
-		spell = UnitChannelInfo(unit)
+		spell = spellID or UnitChannelInfo(unit)
 		modified, r, g, b = nil, nil, nil, nil
 		f:SetScript("OnUpdate", OnUpdate)
 	end
 end
+
+Range.UNIT_SPELLCAST_EMPOWER_START = Range.UNIT_SPELLCAST_START
 
 function Range:UNIT_SPELLCAST_SENT(event, unit, name)
 	if unit ~= "player" then

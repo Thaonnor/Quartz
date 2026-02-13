@@ -70,18 +70,20 @@ function Latency:OnEnable()
 	self:RegisterEvent("CURRENT_SPELL_CAST_CHANGED")
 	self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+	self:RegisterEvent("UNIT_SPELLCAST_FAILED")
+	self:RegisterEvent("UNIT_SPELLCAST_FAILED_QUIET")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
-		if mtype == "statusbar" then
-			lagbox:SetTexture(media:Fetch("statusbar", override))
-		end
-	end)
 	if not lagbox then
 		lagbox = Player.Bar.Bar:CreateTexture(nil, "BACKGROUND")
 		lagtext = Player.Bar.Bar:CreateFontString(nil, "OVERLAY")
 		self.lagbox = lagbox
 		self.lagtext = lagtext
 	end
+	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
+		if mtype == "statusbar" then
+			lagbox:SetTexture(media:Fetch("statusbar", override))
+		end
+	end)
 	self:ApplySettings()
 end
 
@@ -118,6 +120,9 @@ function Latency:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 
 	timeDiff = GetTime() - sendTime
 	local castlength = endTime - startTime
+	if castlength <= 0 then
+		return
+	end
 	timeDiff = timeDiff > castlength and castlength or timeDiff
 	local perc = timeDiff / castlength
 
@@ -185,8 +190,8 @@ function Latency:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 	sendTime = nil
 end
 
-function Latency:UNIT_SPELLCAST_DELAYED(object, bar, unit)
-	self.hooks[object].UNIT_SPELLCAST_DELAYED(object, bar, unit)
+function Latency:UNIT_SPELLCAST_DELAYED(object, bar, unit, guid, spellID, castBarID)
+	self.hooks[object].UNIT_SPELLCAST_DELAYED(object, bar, unit, guid, spellID, castBarID)
 
 	if db.lagembed and timeDiff then
 		local startTime = bar.startTime - timeDiff + db.lagpadding
@@ -203,6 +208,9 @@ function Latency:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	lagbox:Hide()
 	lagtext:Hide()
 end
+
+Latency.UNIT_SPELLCAST_FAILED = Latency.UNIT_SPELLCAST_INTERRUPTED
+Latency.UNIT_SPELLCAST_FAILED_QUIET = Latency.UNIT_SPELLCAST_INTERRUPTED
 
 function Latency:ApplySettings()
 	db = self.db.profile

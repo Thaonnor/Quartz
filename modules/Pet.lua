@@ -27,6 +27,7 @@ local Pet = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 -- GLOBALS: PetCastingBarFrame
 
 local db, getOptions
+local PetCastingBarFrame_RegisterEvent
 
 local defaults = {
 	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
@@ -88,17 +89,28 @@ end
 function Pet:ApplySettings()
 	db = self.db.profile
 
+	if not PetCastingBarFrame then
+		self.Bar:SetConfig(db)
+		if self:IsEnabled() then
+			self.Bar:ApplySettings()
+		end
+		return
+	end
+
+	PetCastingBarFrame_RegisterEvent = PetCastingBarFrame_RegisterEvent or PetCastingBarFrame.RegisterEvent
+
 	-- obey the hideblizz setting no matter if disabled or not
 	if db.hideblizz then
 		PetCastingBarFrame.RegisterEvent = function() end
 		PetCastingBarFrame:UnregisterAllEvents()
 		PetCastingBarFrame:Hide()
 	else
-		PetCastingBarFrame.RegisterEvent = nil
+		PetCastingBarFrame.RegisterEvent = PetCastingBarFrame_RegisterEvent
 		PetCastingBarFrame:UnregisterAllEvents()
 		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_START", "pet")
 		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "pet")
 		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "pet")
+		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED_QUIET", "pet")
 		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "pet")
 		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_DELAYED", "pet")
 		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "pet")

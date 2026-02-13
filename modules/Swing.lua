@@ -33,11 +33,9 @@ local UnitClass, UnitDamage, UnitAttackSpeed, UnitRangedDamage = UnitClass, Unit
 local math_abs, bit_band, unpack = math.abs, bit.band, unpack
 local COMBATLOG_FILTER_ME = COMBATLOG_FILTER_ME
 
-local GetSpellName = C_Spell.GetSpellName
-
 local playerclass
-local autoshotname = GetSpellName(75)
-local slam = GetSpellName(1464)
+local AUTOSHOT_SPELL_ID = 75
+local SLAM_SPELL_ID = 1464
 
 local swingbar, swingbar_width, swingstatusbar, remainingtext, durationtext
 local swingmode -- nil is none, 0 is meleeing, 1 is autoshooting
@@ -110,6 +108,8 @@ function Swing:OnEnable()
 	if playerclass == "WARRIOR" then
 		self:RegisterEvent("UNIT_SPELLCAST_START")
 		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+		self:RegisterEvent("UNIT_SPELLCAST_FAILED")
+		self:RegisterEvent("UNIT_SPELLCAST_FAILED_QUIET")
 	end
 
 	self:RegisterEvent("UNIT_ATTACK")
@@ -171,28 +171,31 @@ end
 function Swing:UNIT_SPELLCAST_SUCCEEDED(event, unit, guid, spell)
 	if unit ~= "player" then return end
 	if swingmode == 0 then
-		if GetSpellName(spell) == slam and slamstart then
+		if spell == SLAM_SPELL_ID and slamstart then
 			starttime = starttime + GetTime() - slamstart
 			slamstart = nil
 		end
 	elseif swingmode == 1 then
-		if GetSpellName(spell) == autoshotname then
+		if spell == AUTOSHOT_SPELL_ID then
 			self:Shoot()
 		end
 	end
 end
 
 function Swing:UNIT_SPELLCAST_START(event, unit, guid, spell)
-	if unit == "player" and GetSpellName(spell) == slam then
+	if unit == "player" and spell == SLAM_SPELL_ID then
 		slamstart = GetTime()
 	end
 end
 
 function Swing:UNIT_SPELLCAST_INTERRUPTED(event, unit, guid, spell)
-	if unit == "player" and GetSpellName(spell) == slam and slamstart then
+	if unit == "player" and spell == SLAM_SPELL_ID and slamstart then
 		slamstart = nil
 	end
 end
+
+Swing.UNIT_SPELLCAST_FAILED = Swing.UNIT_SPELLCAST_INTERRUPTED
+Swing.UNIT_SPELLCAST_FAILED_QUIET = Swing.UNIT_SPELLCAST_INTERRUPTED
 
 function Swing:UNIT_ATTACK(event, unit)
 	if unit == "player" then
