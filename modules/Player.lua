@@ -33,6 +33,7 @@ local unpack = unpack
 
 
 local db, getOptions, castBar
+local PlayerCastingBarFrame_RegisterEvent
 
 local defaults = {
 	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
@@ -40,8 +41,8 @@ local defaults = {
 		hideblizz = true,
 		showticks = true,
 		-- no interrupt is pointless for player, disable all options
-		noInterruptBorderChange = false,
-		noInterruptColorChange = false,
+		noInterruptChangeBorder = false,
+		noInterruptChangeColor = false,
 		noInterruptShield = false,
 		targetnamestyle = "default"
 	})
@@ -135,12 +136,23 @@ end
 function Player:ApplySettings()
 	db = self.db.profile
 
+	if not PlayerCastingBarFrame then
+		self.Bar:SetConfig(db)
+		if self:IsEnabled() then
+			self.Bar:ApplySettings()
+		end
+		return
+	end
+
+	PlayerCastingBarFrame_RegisterEvent = PlayerCastingBarFrame_RegisterEvent or PlayerCastingBarFrame.RegisterEvent
+
 	-- obey the hideblizz setting no matter if disabled or not
 	if db.hideblizz then
 		PlayerCastingBarFrame.RegisterEvent = function() end
 		PlayerCastingBarFrame:UnregisterAllEvents()
 		PlayerCastingBarFrame:Hide()
 	else
+		PlayerCastingBarFrame.RegisterEvent = PlayerCastingBarFrame_RegisterEvent
 		PlayerCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player")
 		PlayerCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_DELAYED", "player")
 		PlayerCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "player")
@@ -154,6 +166,7 @@ function Player:ApplySettings()
 		PlayerCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
 		PlayerCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
 		PlayerCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player")
+		PlayerCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED_QUIET", "player")
 		PlayerCastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	end
 
@@ -262,10 +275,6 @@ local function getChannelingTicks(spell, spellid)
 		return 0
 	end
 	return channelingTicks[spellid] or channelingTicks[spell] or 0
-end
-
-local function isTalentKnown(talentID)
-	return (select(4, GetTalentInfoByID(19752, GetActiveSpecGroup())))
 end
 
 function Player:UpdateChannelingTicks()
