@@ -188,6 +188,10 @@ CastBarTemplate.ToggleCastNotInterruptible = ToggleCastNotInterruptible
 ----------------------------
 -- Event Handlers
 
+local function IsMatchingCastBarID(self, castBarID)
+	return not (castBarID and self.castBarID and castBarID ~= self.castBarID)
+end
+
 function CastBarTemplate:UNIT_SPELLCAST_SENT(event, unit, target, guid, spellID)
 	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") then
 		return
@@ -202,17 +206,17 @@ function CastBarTemplate:UNIT_SPELLCAST_SENT(event, unit, target, guid, spellID)
 	call(self, "UNIT_SPELLCAST_SENT", unit, target, guid, spellID)
 end
 
-function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
+function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID, eventCastBarID)
 	if (unit ~= self.unit and not (self.unit == "player" and unit == "vehicle")) or call(self, "PreShowCondition", unit) then
 		return
 	end
 	local db = self.config
 
-	local spell, displayName, icon, startTime, endTime, _, notInterruptible, numStages
+	local spell, displayName, icon, startTime, endTime, _, notInterruptible, numStages, castBarID
 	if event == "UNIT_SPELLCAST_START" then
-		spell, displayName, icon, startTime, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+		spell, displayName, icon, startTime, endTime, _, _, notInterruptible, _, castBarID = UnitCastingInfo(unit)
 	else -- self.channeling
-		spell, displayName, icon, startTime, endTime, _, notInterruptible, _, _, numStages = UnitChannelInfo(unit)
+		spell, displayName, icon, startTime, endTime, _, notInterruptible, _, _, numStages, castBarID = UnitChannelInfo(unit)
 		-- channeling spells sometimes just display "Channeling" - this is not wanted
 		displayName = spell
 	end
@@ -240,6 +244,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	self.delay = 0
 	self.fadeOut = nil
 	self.numStages = numStages
+	self.castBarID = castBarID or eventCastBarID
 
 	self.Bar:SetStatusBarColor(unpack(self.casting and Quartz3.db.profile.castingcolor or Quartz3.db.profile.channelingcolor))
 
@@ -269,13 +274,16 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 
 	ToggleCastNotInterruptible(self, notInterruptible)
 
-	call(self, "UNIT_SPELLCAST_START", unit, guid, spellID)
+	call(self, "UNIT_SPELLCAST_START", unit, guid, spellID, eventCastBarID)
 end
 CastBarTemplate.UNIT_SPELLCAST_CHANNEL_START = CastBarTemplate.UNIT_SPELLCAST_START
 CastBarTemplate.UNIT_SPELLCAST_EMPOWER_START = CastBarTemplate.UNIT_SPELLCAST_START
 
-function CastBarTemplate:UNIT_SPELLCAST_STOP(event, unit)
+function CastBarTemplate:UNIT_SPELLCAST_STOP(event, unit, guid, spellID, castBarID)
 	if not (self.channeling or self.casting) or (unit ~= self.unit and not (self.unit == "player" and unit == "vehicle")) then
+		return
+	end
+	if not IsMatchingCastBarID(self, castBarID) then
 		return
 	end
 
@@ -283,37 +291,46 @@ function CastBarTemplate:UNIT_SPELLCAST_STOP(event, unit)
 	self.Bar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
 
 	self.casting, self.channeling = nil, nil
+	self.castBarID = nil
 	self.fadeOut = true
 	self.stopTime = GetTime()
 
 	self.TimeText:SetText("")
 
-	call(self, "UNIT_SPELLCAST_STOP", unit)
+	call(self, "UNIT_SPELLCAST_STOP", unit, guid, spellID, castBarID)
 end
 CastBarTemplate.UNIT_SPELLCAST_CHANNEL_STOP = CastBarTemplate.UNIT_SPELLCAST_STOP
 CastBarTemplate.UNIT_SPELLCAST_EMPOWER_STOP = CastBarTemplate.UNIT_SPELLCAST_STOP
 
-function CastBarTemplate:UNIT_SPELLCAST_FAILED(event, unit)
+function CastBarTemplate:UNIT_SPELLCAST_FAILED(event, unit, guid, spellID, castBarID)
 	if self.channeling or self.casting or (unit ~= self.unit and not (self.unit == "player" and unit == "vehicle")) then
 		return
 	end
+	if not IsMatchingCastBarID(self, castBarID) then
+		return
+	end
 	self.fadeOut = true
 	if not self.stopTime then
 		self.stopTime = GetTime()
 	end
+	self.castBarID = nil
 	self.Bar:SetValue(1.0)
 	self.Bar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
 
 	self.TimeText:SetText("")
 
-	call(self, "UNIT_SPELLCAST_FAILED", unit)
+	call(self, "UNIT_SPELLCAST_FAILED", unit, guid, spellID, castBarID)
 end
 
-function CastBarTemplate:UNIT_SPELLCAST_INTERRUPTED(event, unit)
+function CastBarTemplate:UNIT_SPELLCAST_INTERRUPTED(event, unit, guid, spellID, castBarID)
 	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") then
 		return
 	end
+	if not IsMatchingCastBarID(self, castBarID) then
+		return
+	end
 	self.casting, self.channeling, self.chargeSpell = nil, nil, nil
+	self.castBarID = nil
 	self.fadeOut = true
 	if not self.stopTime then
 		self.stopTime = GetTime()
@@ -323,11 +340,14 @@ function CastBarTemplate:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 
 	self.TimeText:SetText("")
 
-	call(self, "UNIT_SPELLCAST_INTERRUPTED", unit)
+	call(self, "UNIT_SPELLCAST_INTERRUPTED", unit, guid, spellID, castBarID)
 end
 
-function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
+function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit, guid, spellID, castBarID)
 	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") or call(self, "PreShowCondition", unit) then
+		return
+	end
+	if not IsMatchingCastBarID(self, castBarID) then
 		return
 	end
 	local oldStart = self.startTime
@@ -336,9 +356,13 @@ function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
 		_, _, _, startTime, endTime = UnitCastingInfo(unit)
 	else
 		_, _, _, startTime, endTime = UnitChannelInfo(unit)
+		if self.chargeSpell then
+			endTime = endTime and endTime + GetUnitEmpowerHoldAtMaxTime(self.unit)
+		end
 	end
 
 	if not startTime or not endTime then
+		self.castBarID = nil
 		return self:Hide()
 	end
 
@@ -353,7 +377,7 @@ function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
 		self.delay = (self.delay or 0) + ((oldStart or startTime) - startTime)
 	end
 
-	call(self, "UNIT_SPELLCAST_DELAYED", unit)
+	call(self, "UNIT_SPELLCAST_DELAYED", unit, guid, spellID, castBarID)
 end
 CastBarTemplate.UNIT_SPELLCAST_CHANNEL_UPDATE = CastBarTemplate.UNIT_SPELLCAST_DELAYED
 CastBarTemplate.UNIT_SPELLCAST_EMPOWER_UPDATE = CastBarTemplate.UNIT_SPELLCAST_DELAYED
@@ -374,11 +398,17 @@ function CastBarTemplate:UNIT_SPELLCAST_NOT_INTERRUPTIBLE(event, unit)
 end
 
 function CastBarTemplate:UpdateUnit()
-	if UnitCastingInfo(self.unit) then
-		self:UNIT_SPELLCAST_START("UNIT_SPELLCAST_START", self.unit)
-	elseif UnitChannelInfo(self.unit) then
-		self:UNIT_SPELLCAST_START("UNIT_SPELLCAST_CHANNEL_START", self.unit)
+	local _, _, _, _, _, _, _, _, _, castBarID = UnitCastingInfo(self.unit)
+	if castBarID then
+		self:UNIT_SPELLCAST_START("UNIT_SPELLCAST_START", self.unit, nil, nil, castBarID)
+		return
+	end
+
+	local _, _, _, _, _, _, _, _, _, _, channelCastBarID = UnitChannelInfo(self.unit)
+	if channelCastBarID then
+		self:UNIT_SPELLCAST_START("UNIT_SPELLCAST_CHANNEL_START", self.unit, nil, nil, channelCastBarID)
 	else
+		self.castBarID = nil
 		self:Hide()
 	end
 end
