@@ -188,8 +188,14 @@ CastBarTemplate.ToggleCastNotInterruptible = ToggleCastNotInterruptible
 ----------------------------
 -- Event Handlers
 
-local function IsMatchingCastBarID(self, castBarID)
-	return not (castBarID and self.castBarID and castBarID ~= self.castBarID)
+local function IsMatchingCast(self, castGUID, castBarID)
+	if castGUID and self.castGUID and castGUID ~= self.castGUID then
+		return false
+	end
+	if castBarID and self.castBarID and castBarID ~= self.castBarID then
+		return false
+	end
+	return true
 end
 
 function CastBarTemplate:UNIT_SPELLCAST_SENT(event, unit, target, guid, spellID)
@@ -222,6 +228,9 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID, eventC
 	end
 	-- in case this returned nothing
 	if not startTime or not endTime then return end
+	if eventCastBarID and castBarID and eventCastBarID ~= castBarID then
+		return
+	end
 
 	local isChargeSpell = numStages and numStages > 0
 
@@ -245,6 +254,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID, eventC
 	self.fadeOut = nil
 	self.numStages = numStages
 	self.castBarID = castBarID or eventCastBarID
+	self.castGUID = guid
 
 	self.Bar:SetStatusBarColor(unpack(self.casting and Quartz3.db.profile.castingcolor or Quartz3.db.profile.channelingcolor))
 
@@ -283,15 +293,16 @@ function CastBarTemplate:UNIT_SPELLCAST_STOP(event, unit, guid, spellID, castBar
 	if not (self.channeling or self.casting) or (unit ~= self.unit and not (self.unit == "player" and unit == "vehicle")) then
 		return
 	end
-	if not IsMatchingCastBarID(self, castBarID) then
+	if not IsMatchingCast(self, guid, castBarID) then
 		return
 	end
 
 	self.Bar:SetValue(self.casting and 1.0 or 0)
 	self.Bar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
 
-	self.casting, self.channeling = nil, nil
+	self.casting, self.channeling, self.chargeSpell = nil, nil, nil
 	self.castBarID = nil
+	self.castGUID = nil
 	self.fadeOut = true
 	self.stopTime = GetTime()
 
@@ -303,10 +314,10 @@ CastBarTemplate.UNIT_SPELLCAST_CHANNEL_STOP = CastBarTemplate.UNIT_SPELLCAST_STO
 CastBarTemplate.UNIT_SPELLCAST_EMPOWER_STOP = CastBarTemplate.UNIT_SPELLCAST_STOP
 
 function CastBarTemplate:UNIT_SPELLCAST_FAILED(event, unit, guid, spellID, castBarID)
-	if self.channeling or self.casting or (unit ~= self.unit and not (self.unit == "player" and unit == "vehicle")) then
+	if not (self.channeling or self.casting) or (unit ~= self.unit and not (self.unit == "player" and unit == "vehicle")) then
 		return
 	end
-	if not IsMatchingCastBarID(self, castBarID) then
+	if not IsMatchingCast(self, guid, castBarID) then
 		return
 	end
 	self.fadeOut = true
@@ -314,6 +325,8 @@ function CastBarTemplate:UNIT_SPELLCAST_FAILED(event, unit, guid, spellID, castB
 		self.stopTime = GetTime()
 	end
 	self.castBarID = nil
+	self.castGUID = nil
+	self.casting, self.channeling, self.chargeSpell = nil, nil, nil
 	self.Bar:SetValue(1.0)
 	self.Bar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
 
@@ -321,16 +334,18 @@ function CastBarTemplate:UNIT_SPELLCAST_FAILED(event, unit, guid, spellID, castB
 
 	call(self, "UNIT_SPELLCAST_FAILED", unit, guid, spellID, castBarID)
 end
+CastBarTemplate.UNIT_SPELLCAST_FAILED_QUIET = CastBarTemplate.UNIT_SPELLCAST_FAILED
 
 function CastBarTemplate:UNIT_SPELLCAST_INTERRUPTED(event, unit, guid, spellID, castBarID)
 	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") then
 		return
 	end
-	if not IsMatchingCastBarID(self, castBarID) then
+	if not IsMatchingCast(self, guid, castBarID) then
 		return
 	end
 	self.casting, self.channeling, self.chargeSpell = nil, nil, nil
 	self.castBarID = nil
+	self.castGUID = nil
 	self.fadeOut = true
 	if not self.stopTime then
 		self.stopTime = GetTime()
@@ -347,7 +362,7 @@ function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit, guid, spellID, cast
 	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") or call(self, "PreShowCondition", unit) then
 		return
 	end
-	if not IsMatchingCastBarID(self, castBarID) then
+	if not IsMatchingCast(self, guid, castBarID) then
 		return
 	end
 	local oldStart = self.startTime
@@ -363,6 +378,7 @@ function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit, guid, spellID, cast
 
 	if not startTime or not endTime then
 		self.castBarID = nil
+		self.castGUID = nil
 		return self:Hide()
 	end
 
@@ -398,17 +414,18 @@ function CastBarTemplate:UNIT_SPELLCAST_NOT_INTERRUPTIBLE(event, unit)
 end
 
 function CastBarTemplate:UpdateUnit()
-	local _, _, _, _, _, _, _, _, _, castBarID = UnitCastingInfo(self.unit)
-	if castBarID then
+	local castName, _, _, castStartTime, _, _, _, _, _, castBarID = UnitCastingInfo(self.unit)
+	if castName and castStartTime then
 		self:UNIT_SPELLCAST_START("UNIT_SPELLCAST_START", self.unit, nil, nil, castBarID)
 		return
 	end
 
-	local _, _, _, _, _, _, _, _, _, _, channelCastBarID = UnitChannelInfo(self.unit)
-	if channelCastBarID then
+	local channelName, _, _, channelStartTime, _, _, _, _, _, _, channelCastBarID = UnitChannelInfo(self.unit)
+	if channelName and channelStartTime then
 		self:UNIT_SPELLCAST_START("UNIT_SPELLCAST_CHANNEL_START", self.unit, nil, nil, channelCastBarID)
 	else
 		self.castBarID = nil
+		self.castGUID = nil
 		self:Hide()
 	end
 end
@@ -559,6 +576,7 @@ function CastBarTemplate:RegisterEvents()
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_FAILED")
+	self:RegisterEvent("UNIT_SPELLCAST_FAILED_QUIET")
 	self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
