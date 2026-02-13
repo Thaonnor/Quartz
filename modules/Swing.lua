@@ -33,15 +33,11 @@ local UnitClass, UnitDamage, UnitAttackSpeed, UnitRangedDamage = UnitClass, Unit
 local math_abs, bit_band, unpack = math.abs, bit.band, unpack
 local COMBATLOG_FILTER_ME = COMBATLOG_FILTER_ME
 
-local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellInfo
+local GetSpellName = C_Spell.GetSpellName
 
 local playerclass
 local autoshotname = GetSpellName(75)
 local slam = GetSpellName(1464)
-
-local resetautoshotspells = {
-	--[GetSpellName(19434)] = true, -- Aimed Shot
-}
 
 local swingbar, swingbar_width, swingstatusbar, remainingtext, durationtext
 local swingmode -- nil is none, 0 is meleeing, 1 is autoshooting
@@ -103,7 +99,7 @@ function Swing:OnEnable()
 	-- fired when autoattack is enabled/disabled.
 	self:RegisterEvent("PLAYER_ENTER_COMBAT")
 	self:RegisterEvent("PLAYER_LEAVE_COMBAT")
-	-- fired when autoshot (or autowand) is enabled/disabled
+	-- fired when autoshot is enabled/disabled
 	self:RegisterEvent("START_AUTOREPEAT_SPELL")
 	self:RegisterEvent("STOP_AUTOREPEAT_SPELL")
 
@@ -183,10 +179,6 @@ function Swing:UNIT_SPELLCAST_SUCCEEDED(event, unit, guid, spell)
 		if GetSpellName(spell) == autoshotname then
 			self:Shoot()
 		end
-	end
-	if resetautoshotspells[GetSpellName(spell)] then
-		swingmode = 1
-		self:Shoot()
 	end
 end
 

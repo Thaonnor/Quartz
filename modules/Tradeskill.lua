@@ -23,8 +23,6 @@ local MODNAME = "Tradeskill"
 local Tradeskill = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
 local Player = Quartz3:GetModule("Player")
 
-local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
-
 local TimeFmt = Quartz3.Util.TimeFormat
 
 ----------------------------
@@ -91,16 +89,10 @@ function Tradeskill:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	if WoWRetail then
-		if ProfessionsFrame then
-			self:SecureHook(ProfessionsFrame.CraftingPage, "CreateInternal", "DoTradeSkill")
-		else
-			self:RegisterEvent("ADDON_LOADED")
-		end
-	elseif C_TradeSkillUI and C_TradeSkillUI.CraftRecipe then
-		self:SecureHook(C_TradeSkillUI, "CraftRecipe", "DoTradeSkillClassic")
+	if ProfessionsFrame then
+		self:SecureHook(ProfessionsFrame.CraftingPage, "CreateInternal", "DoTradeSkill")
 	else
-		self:SecureHook("DoTradeSkill", "DoTradeSkillClassic")
+		self:RegisterEvent("ADDON_LOADED")
 	end
 end
 
@@ -180,10 +172,6 @@ end
 function Tradeskill:DoTradeSkill(_, id, num)
 	completedcasts = 0
 	repeattimes = tonumber(num) or 1
-end
-
-function Tradeskill:DoTradeSkillClassic(id, num)
-	self:DoTradeSkill(nil, id, num)
 end
 
 function Tradeskill:ApplySettings()
