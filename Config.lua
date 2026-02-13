@@ -23,7 +23,7 @@ local LibDualSpec = LibStub("LibDualSpec-1.0", true)
 
 ----------------------------
 -- Upvalues
--- GLOBALS: LibStub, InterfaceOptionsFrame_OpenToCategory
+-- GLOBALS: LibStub
 local pairs, unpack, type = pairs, unpack, type
 
 local getOpt, setOpt, getColor, setColor
@@ -194,12 +194,7 @@ end
 
 function Quartz3:ChatCommand(input)
 	if not input or input:trim() == "" then
-		if InterfaceOptionsFrame_OpenToCategory then
-			InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Profiles)
-			InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Quartz3)
-		else
-			Settings.OpenToCategory("Quartz 3")
-		end
+		Settings.OpenToCategory("Quartz 3")
 	else
 		LibStub("AceConfigCmd-3.0").HandleCommand(Quartz3, "quartz", "Quartz3", input)
 	end
