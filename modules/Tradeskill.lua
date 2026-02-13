@@ -89,6 +89,8 @@ function Tradeskill:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+	self:RegisterEvent("UNIT_SPELLCAST_FAILED")
+	self:RegisterEvent("UNIT_SPELLCAST_FAILED_QUIET")
 	if ProfessionsFrame then
 		self:SecureHook(ProfessionsFrame.CraftingPage, "CreateInternal", "DoTradeSkill")
 	else
@@ -168,6 +170,9 @@ function Tradeskill:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	end
 	bail = true
 end
+
+Tradeskill.UNIT_SPELLCAST_FAILED = Tradeskill.UNIT_SPELLCAST_INTERRUPTED
+Tradeskill.UNIT_SPELLCAST_FAILED_QUIET = Tradeskill.UNIT_SPELLCAST_INTERRUPTED
 
 function Tradeskill:DoTradeSkill(_, id, num)
 	completedcasts = 0

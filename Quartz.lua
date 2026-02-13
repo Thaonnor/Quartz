@@ -23,7 +23,7 @@ local db
 
 ----------------------------
 -- Upvalues
--- GLOBALS: LibStub, QuartzDB
+-- GLOBALS: LibStub, Quartz3DB
 local type, pairs, tonumber = type, pairs, tonumber
 
 local defaults = {
