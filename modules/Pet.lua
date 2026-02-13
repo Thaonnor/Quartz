@@ -22,8 +22,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local MODNAME = "Pet"
 local Pet = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 
-local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
-
 ----------------------------
 -- Upvalues
 -- GLOBALS: PetCastingBarFrame
@@ -106,13 +104,11 @@ function Pet:ApplySettings()
 		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "pet")
 		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "pet")
 		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "pet")
-		if WoWRetail then
-			PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "pet")
-			PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_UPDATE", "pet")
-			PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "pet")
-			PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTIBLE", "pet")
-			PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "pet")
-		end
+		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "pet")
+		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_UPDATE", "pet")
+		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "pet")
+		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTIBLE", "pet")
+		PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "pet")
 		PetCastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 		PetCastingBarFrame:RegisterEvent("UNIT_PET")
 	end

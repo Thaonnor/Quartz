@@ -23,8 +23,6 @@ local MODNAME = "Flight"
 local Flight = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0")
 local Player = Quartz3:GetModule("Player")
 
-local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-
 ----------------------------
 -- Upvalues
 local GetTime = GetTime
@@ -157,11 +155,7 @@ function Flight:BeginFlight(duration, destination)
 	Player.Bar:SetAlpha(Player.db.profile.alpha)
 
 	Player.Bar.Spark:Show()
-	if WoWClassic then
-		Player.Bar.Icon:SetTexture("Interface\\Icons\\ability_eyeoftheowl")
-	else
-		Player.Bar.Icon:SetTexture("Interface\\Icons\\ability_druid_flightform")
-	end
+	Player.Bar.Icon:SetTexture("Interface\\Icons\\ability_druid_flightform")
 	Player.Bar.Text:SetText(destination)
 
 	local position = Player.db.profile.timetextposition

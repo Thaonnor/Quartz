@@ -42,8 +42,6 @@ local UnitHealth = UnitHealth
 local pairs, unpack, next, wipe, error = pairs, unpack, next, wipe, error
 local table_sort = table.sort
 
-local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-
 local gametimebase, gametimetostart
 local lfgshowbase, readycheckshowbase, readycheckshowduration
 local locked = true
@@ -111,9 +109,9 @@ local icons = {
 	BREATH = "Interface\\Icons\\Spell_Shadow_DemonBreath",
 	EXHAUSTION = "Interface\\Icons\\Ability_Suffocate",
 	FEIGNDEATH = "Interface\\Icons\\Ability_Rogue_FeignDeath",
-	CAMP = WoWClassic and "" or "Interface\\Icons\\INV_Misc_GroupLooking",
+	CAMP = "Interface\\Icons\\INV_Misc_GroupLooking",
 	DEATH = "Interface\\Icons\\Ability_Vanish",
-	QUIT = WoWClassic and "" or "Interface\\Icons\\INV_Misc_GroupLooking",
+	QUIT = "Interface\\Icons\\INV_Misc_GroupLooking",
 	DUEL_OUTOFBOUNDS = "Interface\\Icons\\Ability_Rogue_Sprint",
 	INSTANCE_BOOT = "Interface\\Icons\\INV_Misc_Rune_01",
 	CONFIRM_SUMMON = "Interface\\Icons\\Spell_Shadow_Twilight",
@@ -269,19 +267,11 @@ function Mirror:OnDisable()
 		v:SetScript("OnUpdate", nil)
 	end
 
-	if MirrorTimerContainer then
-		MirrorTimerContainer:Show()
-		MirrorTimerContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
-		MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_START")
-		MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_STOP")
-		MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_PAUSE")
-	else
-		for i = 1, 3 do
-			_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
-			_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_STOP")
-		end
-		UIParent:RegisterEvent("MIRROR_TIMER_START")
-	end
+	MirrorTimerContainer:Show()
+	MirrorTimerContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
+	MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_START")
+	MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_STOP")
+	MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_PAUSE")
 
 	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
 	media.UnregisterCallback(self, "LibSharedMedia_Registered")
@@ -712,29 +702,13 @@ do
 				direction = apply(i, v, direction)
 			end
 			if db.hideblizzmirrors then
-				if MirrorTimerContainer then
-					MirrorTimerContainer:UnregisterAllEvents()
-				else
-					for i = 1, 3 do
-						_G["MirrorTimer"..i]:UnregisterAllEvents()
-						_G["MirrorTimer"..i]:Hide()
-					end
-					UIParent:UnregisterEvent("MIRROR_TIMER_START")
-				end
+				MirrorTimerContainer:UnregisterAllEvents()
 			else
-				if MirrorTimerContainer then
-					MirrorTimerContainer:Show()
-					MirrorTimerContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
-					MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_START")
-					MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_STOP")
-					MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_PAUSE")
-				else
-					for i = 1, 3 do
-						_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
-						_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_STOP")
-					end
-					UIParent:RegisterEvent("MIRROR_TIMER_START")
-				end
+				MirrorTimerContainer:Show()
+				MirrorTimerContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
+				MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_START")
+				MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_STOP")
+				MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_PAUSE")
 			end
 			db.RESURRECT_NO_TIMER = db.RESURRECT_NO_SICKNESS
 			self:UpdateBars()

@@ -105,13 +105,9 @@ end
 function GCD:CheckGCD(event, unit, guid, spell)
 	if unit == "player" then
 		local start, dur
-		if C_Spell and C_Spell.GetSpellCooldown then
-			local cooldown = C_Spell.GetSpellCooldown(spell)
-			if cooldown then
-				start, dur = cooldown.startTime, cooldown.duration
-			end
-		else
-			start, dur = GetSpellCooldown(spell)
+		local cooldown = C_Spell.GetSpellCooldown(spell)
+		if cooldown then
+			start, dur = cooldown.startTime, cooldown.duration
 		end
 		if dur and dur > 0 and dur <= 1.5 then
 			starttime = start

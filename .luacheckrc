@@ -77,7 +77,6 @@ read_globals = {
 	"UnitRangedDamage",
 
 	-- FrameXML functions
-	"InterfaceOptionsFrame_OpenToCategory",
 	"Settings.OpenToCategory",
 
 	-- FrameXML Frames

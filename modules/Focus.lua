@@ -19,17 +19,12 @@
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
--- Focus is not available on all clients
-if not FocusFrameSpellBar then return end
-
 local MODNAME = "Focus"
 local Focus = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 
 ----------------------------
 -- Upvalues
 local UnitIsEnemy, UnitIsFriend, UnitIsUnit = UnitIsEnemy, UnitIsFriend, UnitIsUnit
-
-local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
 local db, getOptions
 
@@ -142,13 +137,11 @@ function Focus:ApplySettings()
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "focus")
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "focus")
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "focus")
-		if WoWRetail then
-			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "focus")
-			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_UPDATE", "focus")
-			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "focus")
-			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTIBLE", "focus")
-			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "focus")
-		end
+		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "focus")
+		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_UPDATE", "focus")
+		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "focus")
+		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTIBLE", "focus")
+		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "focus")
 
 		FocusFrameSpellBar:RegisterEvent("PLAYER_ENTERING_WORLD")
 		FocusFrameSpellBar:RegisterEvent("PLAYER_FOCUS_CHANGED")
