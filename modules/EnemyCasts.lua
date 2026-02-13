@@ -36,6 +36,7 @@ local lsmlist = AceGUIWidgetLSMlists
 -- GLOBALS: CastingBarFrame
 local tsort, tinsert = table.sort, table.insert
 local bit_band, bit_bor = bit.band, bit.bor
+local UNKNOWN = UNKNOWN
 
 local locked = true
 local db, getOptions, castBar
@@ -161,6 +162,9 @@ end
 function Enemy:CLEUHandler()
 	if db.instanceonly and not IsInInstance() then return end
 	local timestamp, event, hideCaster, sGUID, sName, sFlags, sRaidFlags, dGUID, dName, dFlags, dRaidFlags, spellId, spellName = CombatLogGetCurrentEventInfo()
+	if not sGUID or not sFlags then
+		return
+	end
 	if
 		bit_band(sFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == COMBATLOG_OBJECT_REACTION_FRIENDLY or
 		bit_band(sFlags, COMBATLOG_OBJECT_CONTROL_NPC) == 0
@@ -177,16 +181,20 @@ function Enemy:CLEUHandler()
 			texture = info.iconID
 			castTime = info.castTime
 		end
+		castTime = castTime or 0
+		if castTime <= 0 then
+			return
+		end
 		casts[sGUID].name = sName
-		casts[sGUID].spellName = spellName
+		casts[sGUID].spellName = spellName or UNKNOWN
 		casts[sGUID].spellId = spellId
 		casts[sGUID].texture = texture
-		casts[sGUID].duration = castTime / 1000 * (1 + (CR_HASTE_SPELL and (GetCombatRatingBonus(CR_HASTE_SPELL) / 100) or 0))
+		casts[sGUID].duration = castTime / 1000
 		casts[sGUID].startTime = GetTime()
 		casts[sGUID].endTime = casts[sGUID].startTime + casts[sGUID].duration
 
 		self:UpdateBars()
-	elseif event == "SPELL_CAST_FAILED" or event == "SPELL_CAST_SUCCESS" and casts[sGUID] then
+	elseif (event == "SPELL_CAST_FAILED" or event == "SPELL_CAST_SUCCESS" or event == "SPELL_INTERRUPT") and casts[sGUID] then
 		del(casts[sGUID])
 		casts[sGUID] = nil
 		self:UpdateBars()
