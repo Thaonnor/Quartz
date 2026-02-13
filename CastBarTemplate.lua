@@ -284,7 +284,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID, eventC
 
 	ToggleCastNotInterruptible(self, notInterruptible)
 
-	call(self, "UNIT_SPELLCAST_START", unit, guid, spellID, eventCastBarID)
+	call(self, "UNIT_SPELLCAST_START", unit, guid, spellID, self.castBarID)
 end
 CastBarTemplate.UNIT_SPELLCAST_CHANNEL_START = CastBarTemplate.UNIT_SPELLCAST_START
 CastBarTemplate.UNIT_SPELLCAST_EMPOWER_START = CastBarTemplate.UNIT_SPELLCAST_START
@@ -1131,11 +1131,11 @@ Quartz3.CastBarTemplate.defaults = {
 	timetextx = 3,
 	timetexty = 0,
 
-	noInterruptBorderChange = false,
+	noInterruptChangeBorder = false,
 	noInterruptBorder = "Tooltip enlarged",
 	noInterruptBorderColor = {0.71, 0.73, 0.71}, -- Default color chosen by playing around with settings, rounded to 2 significant digits
 	noInterruptBorderAlpha = 1,
-	noInterruptColorChange = false,
+	noInterruptChangeColor = false,
 	noInterruptColor = {1.0, 0.49, 0},
 	noInterruptShield = true,
 }
