@@ -29,6 +29,7 @@ local GetTime = GetTime
 local unpack = unpack
 
 local db, getOptions
+local inFlightHooked
 
 local defaults = {
 	profile = {
@@ -89,33 +90,39 @@ end
 
 function Flight:OnEnable()
 	self:RegisterEvent("TAXIMAP_OPENED")
+	self:TryHookInFlight()
 end
 
 function Flight:ApplySettings()
 	db = self.db.profile
 end
 
-function Flight:TAXIMAP_OPENED()
-	local loaded = C_AddOns.LoadAddOn("InFlight")
-	if loaded then
-		function Flight.OnEnable(_self)
-			self:SecureHook(InFlight, "StartTimer")
-		end
+function Flight:TryHookInFlight()
+	if inFlightHooked then
+		return
+	end
 
-		function Flight.StartTimer(_self)
-			InFlightBar:Hide()
-			local duration = InFlight:GetFlightTime()
-			if duration and duration > 0 then
-				self:BeginFlight(duration, InFlight:GetDestination())
-			end
-		end
+	local loaded = C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded("InFlight")
+	if not loaded and C_AddOns and C_AddOns.LoadAddOn then
+		loaded = C_AddOns.LoadAddOn("InFlight")
+	end
 
-		-- Execute the new OnEnable to hook InFlight
-		if Flight:IsEnabled() then
-			Flight:OnEnable()
-		end
-
+	if loaded and InFlight then
+		self:SecureHook(InFlight, "StartTimer")
+		inFlightHooked = true
 		self:UnregisterEvent("TAXIMAP_OPENED")
+	end
+end
+
+function Flight:TAXIMAP_OPENED()
+	self:TryHookInFlight()
+end
+
+function Flight:StartTimer(_self)
+	InFlightBar:Hide()
+	local duration = InFlight:GetFlightTime()
+	if duration and duration > 0 then
+		self:BeginFlight(duration, InFlight:GetDestination())
 	end
 end
 
@@ -156,7 +163,7 @@ function Flight:BeginFlight(duration, destination)
 
 	Player.Bar.Spark:Show()
 	Player.Bar.Icon:SetTexture("Interface\\Icons\\ability_druid_flightform")
-	Player.Bar.Text:SetText(destination)
+	Player.Bar.Text:SetText(destination or "")
 
 	local position = Player.db.profile.timetextposition
 	if position == "caststart" then

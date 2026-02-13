@@ -29,7 +29,7 @@ local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
 local unpack = unpack
 
 local gcdbar, gcdbar_width, gcdspark
-local starttime, duration, warned
+local starttime, duration
 
 local db, getOptions
 
@@ -104,12 +104,15 @@ end
 
 function GCD:CheckGCD(event, unit, guid, spell)
 	if unit == "player" then
+		if not spell or not C_Spell or not C_Spell.GetSpellCooldown then
+			return
+		end
 		local start, dur
 		local cooldown = C_Spell.GetSpellCooldown(spell)
 		if cooldown then
 			start, dur = cooldown.startTime, cooldown.duration
 		end
-		if dur and dur > 0 and dur <= 1.5 then
+		if start and dur and dur > 0 and dur <= 1.5 then
 			starttime = start
 			duration = dur
 			gcdbar:Show()

@@ -27,6 +27,7 @@ local Focus = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local UnitIsEnemy, UnitIsFriend, UnitIsUnit = UnitIsEnemy, UnitIsFriend, UnitIsUnit
 
 local db, getOptions
+local FocusFrameSpellBar_RegisterEvent
 
 local defaults = {
 	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
@@ -121,17 +122,28 @@ end
 function Focus:ApplySettings()
 	db = self.db.profile
 
+	if not FocusFrameSpellBar then
+		self.Bar:SetConfig(db)
+		if self:IsEnabled() then
+			self.Bar:ApplySettings()
+		end
+		return
+	end
+
+	FocusFrameSpellBar_RegisterEvent = FocusFrameSpellBar_RegisterEvent or FocusFrameSpellBar.RegisterEvent
+
 	-- obey the hideblizz setting no matter if disabled or not
 	if db.hideblizz then
 		FocusFrameSpellBar.RegisterEvent = function() end
 		FocusFrameSpellBar:UnregisterAllEvents()
 		FocusFrameSpellBar:Hide()
 	else
-		FocusFrameSpellBar.RegisterEvent = nil
+		FocusFrameSpellBar.RegisterEvent = FocusFrameSpellBar_RegisterEvent
 		FocusFrameSpellBar:UnregisterAllEvents()
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_START", "focus")
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "focus")
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "focus")
+		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_FAILED_QUIET", "focus")
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "focus")
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_DELAYED", "focus")
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "focus")

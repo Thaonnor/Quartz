@@ -790,12 +790,12 @@ function Buff:OnEnable()
 	end)
 
 	media.RegisterCallback(self, "LibSharedMedia_Registered", function(mtype, key)
-		if mtype == "statusbar" and key == self.config.bufftexture then
+		if mtype == "statusbar" and key == db.bufftexture then
 			for i, v in pairs(targetbars) do
-				v:SetStatusBarTexture(media:Fetch("statusbar", self.config.bufftexture))
+				v:SetStatusBarTexture(media:Fetch("statusbar", db.bufftexture))
 			end
 			for i, v in pairs(focusbars) do
-				v:SetStatusBarTexture(media:Fetch("statusbar", self.config.bufftexture))
+				v:SetStatusBarTexture(media:Fetch("statusbar", db.bufftexture))
 			end
 		end
 	end)
@@ -934,7 +934,7 @@ do
 				local v = tmp[k]
 				maxindex = k
 				local bar = targetbars[k]
-				if v.applications > 1 then
+				if (v.applications or 0) > 1 then
 					bar.text:SetFormattedText("%s (%s)", v.name, v.applications)
 				else
 					bar.text:SetText(v.name)
@@ -1042,7 +1042,7 @@ do
 				local v = tmp[k]
 				maxindex = k
 				local bar = focusbars[k]
-				if v.applications > 1 then
+				if (v.applications or 0) > 1 then
 					bar.text:SetFormattedText("%s (%s)", v.name, v.applications)
 				else
 					bar.text:SetText(v.name)

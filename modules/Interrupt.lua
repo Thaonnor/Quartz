@@ -28,8 +28,10 @@ local db, getOptions
 ----------------------------
 -- Upvalues
 local GetTime = GetTime
+local bit_band = bit.band
 local unpack = unpack
 local SPELLINTERRUPTOTHERSELF, UNKNOWN = SPELLINTERRUPTOTHERSELF, UNKNOWN
+local COMBATLOG_FILTER_ME = COMBATLOG_FILTER_ME
 
 local defaults = {
 	profile = {
@@ -54,8 +56,8 @@ function Interrupt:ApplySettings()
 end
 
 function Interrupt:COMBAT_LOG_EVENT_UNFILTERED()
-	local timestamp, combatEvent, _, _, sourceName, _, _, _, _, destFlags = CombatLogGetCurrentEventInfo()
-	if combatEvent == "SPELL_INTERRUPT" and destFlags == 0x511 then
+	local _, combatEvent, _, _, sourceName, _, _, _, _, destFlags = CombatLogGetCurrentEventInfo()
+	if combatEvent == "SPELL_INTERRUPT" and bit_band(destFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME then
 		Player.Bar.Text:SetFormattedText(L["INTERRUPTED (%s)"], (sourceName or UNKNOWN):upper())
 		Player.Bar.Bar:SetStatusBarColor(unpack(db.interruptcolor))
 		Player.Bar.stopTime = GetTime()
